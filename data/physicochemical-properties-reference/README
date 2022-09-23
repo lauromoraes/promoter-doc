@@ -1,0 +1,7 @@
+This directory contains the physicochemical properties data related to the dinucleotides and trinucleotides composition.
+ All data are from the supplementary materials from the study
+ "PseKNC: A flexible web server for generating pseudo K-tuple nucleotide composition"
+      Chen, Wei, et al. (Analytical biochemistry, 2014).
+
+Link: https://www.sciencedirect.com/science/article/pii/S0003269714001249#m0005
+[1] Chen, Wei, et al. "PseKNC: a flexible web server for generating pseudo K-tuple nucleotide composition." Analytical biochemistry 456 (2014): 53-60.
