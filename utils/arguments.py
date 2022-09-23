@@ -24,7 +24,7 @@ def get_args_parser() -> ArgumentParser:
     :return: Argument Parser
     """
     parser = ArgumentParser()
-    parser.add_argument('-y', '--yaml', help='The YAML file with experiment configuration.')
+    parser.add_argument('-y', '--yaml', help='The YAML file with experiment configuration.', required=True)
     return parser
 
 
