@@ -1,5 +1,7 @@
+import os
 import re
 import abc
+import pandas as pd
 import numpy as np
 from numpy import array
 from itertools import product
@@ -7,6 +9,9 @@ from Bio import SeqIO
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
+
+from icecream import ic as ic
+# ic.disable()
 
 
 class EncodedDataset(object):
@@ -75,17 +80,87 @@ class EncodedDataset(object):
 
 
 class IntegerSeqEncoder(EncodedDataset):
-    def __init__(self):
-        super(IntegerSeqEncoder, self).__init__()
+    def __init__(self, raw_datasets: tuple[list[str]], k: int = 1, step: int = 1, encode_type: str = 'label',
+                 slice: tuple[int] = None, discard_invalids: bool = True) -> None:
+        super(IntegerSeqEncoder, self).__init__(raw_datasets, k, step, encode_type, slice, discard_invalids)
 
     def transform_sequences(self, sequences: list[str], k: int = 1, step: int = 1):
         sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
         label_encoder = self.get_k_mers_encoder(k)
-        labeled_sequences = [label_encoder.transform(s) for s in sequences_mers]
+        labeled_sequences = np.array([label_encoder.transform(s) for s in sequences_mers])
         return labeled_sequences
 
 
-class OneHotSeqEncoder(object):
-    #TODO: criar nova classe de encoder
-    def __init__(self):
-        super(OneHotSeqEncoder, self).__init__()
+class OneHotSeqEncoder(EncodedDataset):
+    def __init__(self, raw_datasets: tuple[list[str]], k: int = 1, step: int = 1, encode_type: str = 'label',
+                 slice: tuple[int] = None, discard_invalids: bool = True) -> None:
+        """
+
+        :param raw_datasets:
+        :param k:
+        :param step:
+        :param encode_type:
+        :param slice:
+        :param discard_invalids:
+        """
+        super(OneHotSeqEncoder, self).__init__(raw_datasets, k, step, encode_type, slice, discard_invalids)
+
+    def transform_sequences(self, sequences: list[str], k: int = 1, step: int = 1):
+        from tensorflow.keras.utils import to_categorical
+
+        def encode(seq):
+            return to_categorical(seq, num_classes=4 ** k, dtype='int32').T
+
+        sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
+        label_encoder = self.get_k_mers_encoder(k)
+        encoded_sequences = np.array([label_encoder.transform(s) for s in sequences_mers])
+        encoded_sequences = np.array([encode(x) for x in encoded_sequences])
+        return encoded_sequences
+
+
+class PropertyEncoder(EncodedDataset):
+    # TODO: implement PropertyEncoder Class
+    def __init__(self, raw_datasets: tuple[list[str]], k: int = 1, step: int = 1, encode_type: str = 'label',
+                 slice: tuple[int] = None, discard_invalids: bool = True) -> None:
+        """
+
+        :param raw_datasets:
+        :param k:
+        :param step:
+        :param encode_type:
+        :param slice:
+        :param discard_invalids:
+        """
+        super(PropertyEncoder, self).__init__(raw_datasets, k, step, encode_type, slice, discard_invalids)
+
+    def get_prop_data(self, k: int = None):
+        if k == 2:
+            file_path = 'dinuc'
+        elif k == 3:
+            file_path = 'trinuc'
+        else:
+            raise ValueError(f'k value must be 2 or 3, received {k}')
+        file_path = os.path.join(os.getcwd(), 'data', 'physicochemical-properties-reference', f'{file_path}.tsv')
+        prop_data = pd.read_csv(file_path, sep='\t', index_col=0)
+        self.prop_index = prop_data.index
+        return prop_data
+
+    def transform_sequences(self, sequences: list[str], k: int = 1, step: int = 1):
+        """Receive a single dataset of nucelotides sequences and transform it into
+        a dataset of sequences of
+
+        :param sequences:
+        :param k:
+        :param step:
+        :return:
+        """
+        ic.disable()
+        sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
+        prop_data = self.get_prop_data(k)
+        prop_idx = prop_data.index
+        encoded = np.array([np.array([prop_data[mer] for mer in sequence]) for sequence in sequences_mers])
+        encoded = encoded.swapaxes(0,2)
+        encoded = encoded.swapaxes(1, 2)
+        ic(encoded, encoded.shape)
+        ic.enable()
+        return encoded
