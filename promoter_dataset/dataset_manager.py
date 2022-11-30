@@ -1,11 +1,14 @@
 import re
 import numpy as np
 from Bio import SeqIO
+from sklearn.model_selection import StratifiedKFold
 
 from promoter_dataset.seq_encoders import *
 
 from icecream import ic as ic
 # ic.disable()
+
+SEED = 17
 
 class DatasetManager(object):
 
@@ -13,16 +16,63 @@ class DatasetManager(object):
         self.fasta_paths = fasta_paths
         self.raw_dataset_manager: RawDatasetManager = RawDatasetManager(fasta_paths=fasta_paths)
         self.raw_dataset_manager.prepare_fasta_sequences()
-        self.datasets: list[RawDatasetManager] = list()
+        self.datasets: list[RawDatasetManager] = self.transform_raw_datasets
+        self.partitions = None
+        self.X = None
+        self.y = None
 
-    def setup_datasets(self, params: list[dict]):
-        for dataset_param in params:
-            k = dataset_param['k']
-            encode_type = dataset_param['encode']
-            slice_positions = dataset_param['slice']
-            # step = dataset_param['step']
-            self.raw_dataset_manager.encode_datasets(encoder_type=encode_type, slice=slice_positions, k=k, step=1,
-                                                     verbose=True)
+    def transform_raw_datasets(self, params: list[dict]) -> list[EncodedDataset]:
+        """ Iterate over each parameter set and process raw data, transforming it into new encoded and
+        sliced feature dataset.
+
+        :param params: List of parameters to configure the data transforming.
+        """
+        def transform_dataset(p: dict) -> EncodedDataset:
+            k = p['k']
+            encode_type = p['encode']
+            slice_positions = p['slice']
+
+            d = self.raw_dataset_manager.encode_datasets(
+                encoder_type=encode_type,
+                slice=slice_positions,
+                k=k,
+                step=1,
+                verbose=True)
+
+            return d
+
+        datasets: list[EncodedDataset] = [transform_dataset(p) for p in params]
+
+        self.datasets = datasets
+
+        return datasets
+
+    def setup_partitions(self, n_splits, verbose: bool = True) -> StratifiedKFold:
+        ic.enable() if verbose else ic.disable()
+        self.partitions = StratifiedKFold(n_splits=n_splits, random_state=SEED, shuffle=True)
+        X = self.datasets[0].encoded_datasets
+        y = np.concatenate([np.full(c.shape[0], fill_value=i) for i, c in enumerate(X)], axis=0)
+        X = np.concatenate(self.datasets[0].encoded_datasets, axis=0)
+        self.X = X
+        self.y = y
+        ic(X, type(X), len(X))
+        ic(y, type(y), len(y))
+
+        self.partitions.get_n_splits(X, y)
+
+        ic.disable() if verbose else None
+        return self.partitions
+
+    def get_next_split(self, verbose: bool = True):
+        ic.enable() if verbose else ic.disable()
+        for i, (train_index, test_index) in enumerate(self.partitions.split(self.X, self.y)):
+            ic(f'Split {i}')
+            ic(train_index, test_index)
+
+        ic.disable() if verbose else None
+
+
+
 
 
 class RawDatasetManager(object):
@@ -86,7 +136,7 @@ class RawDatasetManager(object):
             'encode_type': encoder_type,
             'slice': slice
         }
-        ic(args)
+        # ic(args)
 
         if encoder_type == 'label':
             encoded = IntegerSeqEncoder(**args)
@@ -96,7 +146,7 @@ class RawDatasetManager(object):
             encoded = PropertyEncoder(**args)
         else:
             print(f'Invalid encode type: {encoder_type}.')
-        ic(encoded)
+        # ic(encoded)
 
         ic.disable() if verbose else None
         return encoded
