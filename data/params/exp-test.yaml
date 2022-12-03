@@ -16,6 +16,9 @@ data:
   - k: 2
     encode: label
     slice: [59, 20, 20]
+  - k: 3
+    encode: label
+    slice: [ 59, 20, 20 ]
 hypermodel:
   execution_per_trial: 3
   hyperband_max_epochs: 30

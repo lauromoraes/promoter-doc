@@ -16,7 +16,7 @@ class DatasetManager(object):
         self.fasta_paths = fasta_paths
         self.raw_dataset_manager: RawDatasetManager = RawDatasetManager(fasta_paths=fasta_paths)
         self.raw_dataset_manager.prepare_fasta_sequences()
-        self.datasets: list[RawDatasetManager] = self.transform_raw_datasets
+        self.datasets: list[EncodedDataset] = None
         self.partitions = None
         self.X = None
         self.y = None

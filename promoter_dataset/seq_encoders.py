@@ -6,15 +6,22 @@ import numpy as np
 from numpy import array
 from itertools import product
 from Bio import SeqIO
+from collections.abc import Iterable
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 
 from icecream import ic as ic
+
+
 # ic.disable()
 
+class Dataset(object):
+    def __init__(self):
+        pass
 
-class EncodedDataset(object):
+
+class EncodedDataset(Dataset):
     """This class is responsible to process nucleotide datasets and transform them into encoded datasets.
 
     Attributes:
@@ -41,6 +48,7 @@ class EncodedDataset(object):
             subsequence surrounding the TSS position. If not provided, take all sequence.
         discard_invalids (bool, optional): Defines if only standard sequences will be accept (only contains A, T, G, C).
         """
+        super(EncodedDataset, self).__init__()
         self.raw_datasets = raw_datasets
         self.k = k
         self.step = step
@@ -77,6 +85,80 @@ class EncodedDataset(object):
                 dataset = self.transform_sequences(sequences=dataset, k=self.k, step=self.step)
             datasets.append(dataset)
         return datasets
+
+
+class JoinedEncodedDataset(Dataset):
+    def __init__(self, original_datasets: list[EncodedDataset], type: str = 'horizontal'):
+        super(JoinedEncodedDataset, self).__init__()
+        print('Inside JoinedEncodedDataset')
+        self.original_datasets: list[EncodedDataset] = original_datasets
+        self.type = type
+        self.encoded_datasets = None
+        self.combine_datasets()
+
+    # def combine(self, head, tail):
+    #     if isinstance(tail, Iterable):
+    #         if len(tail) > 1:
+    #             print('head tail')
+    #             combined = self.combine(tail[0], tail[1:])
+    #             return combined
+    #         else:
+    #             print('last head tail')
+    #             combined = self.combine(head, tail[0])
+    #             return combined
+    #     print('head', type(head))
+    #     print('tail', type(tail))
+    #     n_class = len(head.encoded_datasets)
+    #     new_encoded_datasets = list()
+    #     for i in range(n_class):
+    #         joined = np.concatenate(())
+    #         new_encoded_datasets.append(joined)
+    #     return head
+    #     # assert head.shape[0] == tail.shape[0]
+    #     # if self.type == 'vertical':
+    #     #     assert head.shape[1] == tail.shape[1]
+    #
+    # def merge_two(self, classes_arrays_1: list[np.array], classes_arrays_2: list[np.array]):
+    #     assert type(classes_arrays_1) == type(classes_arrays_2)
+    #     assert len(classes_arrays_1) == len(classes_arrays_2)
+    #     n_classes = len(classes_arrays_1)
+    #     class_list = list()
+    #     for i in range(n_classes):
+    #         class_array_1 = classes_arrays_1[i]
+    #         class_array_2 = classes_arrays_2[i]
+    #         print(f'Merging class {i}')
+    #         print(f'{(class_array_1.shape)}')
+    #         print(f'{(class_array_2.shape)}')
+    #         if self.type == 'horizontal':
+    #             np.concatenate((class_array_1, class_array_2), axis=0)
+
+
+
+    def combine_datasets(self, _datasets: list[EncodedDataset] = None):
+        datasets = self.original_datasets if not _datasets else _datasets
+        n_encode_types = len(datasets)
+        if n_encode_types == 1:
+            return datasets[0]
+        elif n_encode_types <= 1:
+            raise Exception
+        n_class = len(datasets[0].encoded_datasets)
+        _axis = 0 if self.type == 'vertical' else 1
+        new_encoded_datasets = list()
+        for c in range(n_class):
+            _datasets = [d.encoded_datasets[c] for d in datasets]
+            joined = np.concatenate(_datasets, axis=_axis)
+            new_encoded_datasets.append(joined)
+        self.encoded_datasets = new_encoded_datasets
+        return new_encoded_datasets
+        # for i, dataset in enumerate(datasets):
+        #     print(f'+++ Encoded Dataset Type: {i} +++')
+        #     print(type(dataset))
+        # for j, class_dataset in enumerate(dataset.encoded_datasets):
+        #     print(f'Encoded Dataset Type: {i} - Class {j}')
+        #     print(f'{type(class_dataset)} with shape: {class_dataset.shape}\n', class_dataset[:1])
+        # print(dataset, type(dataset.encoded_datasets), f'n_class: {len(dataset.encoded_datasets)}\n',
+        # dataset.encoded_datasets)
+
 
 
 class IntegerSeqEncoder(EncodedDataset):
@@ -159,7 +241,7 @@ class PropertyEncoder(EncodedDataset):
         prop_data = self.get_prop_data(k)
         prop_idx = prop_data.index
         encoded = np.array([np.array([prop_data[mer] for mer in sequence]) for sequence in sequences_mers])
-        encoded = encoded.swapaxes(0,2)
+        encoded = encoded.swapaxes(0, 2)
         encoded = encoded.swapaxes(1, 2)
         ic(encoded, encoded.shape)
         ic.enable()
