@@ -87,52 +87,14 @@ class EncodedDataset(Dataset):
         return datasets
 
 
-class JoinedEncodedDataset(Dataset):
+class MergedEncodedDataset(Dataset):
     def __init__(self, original_datasets: list[EncodedDataset], type: str = 'horizontal'):
-        super(JoinedEncodedDataset, self).__init__()
-        print('Inside JoinedEncodedDataset')
+        super(MergedEncodedDataset, self).__init__()
+        print('Inside MergedEncodedDataset')
         self.original_datasets: list[EncodedDataset] = original_datasets
         self.type = type
         self.encoded_datasets = None
         self.combine_datasets()
-
-    # def combine(self, head, tail):
-    #     if isinstance(tail, Iterable):
-    #         if len(tail) > 1:
-    #             print('head tail')
-    #             combined = self.combine(tail[0], tail[1:])
-    #             return combined
-    #         else:
-    #             print('last head tail')
-    #             combined = self.combine(head, tail[0])
-    #             return combined
-    #     print('head', type(head))
-    #     print('tail', type(tail))
-    #     n_class = len(head.encoded_datasets)
-    #     new_encoded_datasets = list()
-    #     for i in range(n_class):
-    #         joined = np.concatenate(())
-    #         new_encoded_datasets.append(joined)
-    #     return head
-    #     # assert head.shape[0] == tail.shape[0]
-    #     # if self.type == 'vertical':
-    #     #     assert head.shape[1] == tail.shape[1]
-    #
-    # def merge_two(self, classes_arrays_1: list[np.array], classes_arrays_2: list[np.array]):
-    #     assert type(classes_arrays_1) == type(classes_arrays_2)
-    #     assert len(classes_arrays_1) == len(classes_arrays_2)
-    #     n_classes = len(classes_arrays_1)
-    #     class_list = list()
-    #     for i in range(n_classes):
-    #         class_array_1 = classes_arrays_1[i]
-    #         class_array_2 = classes_arrays_2[i]
-    #         print(f'Merging class {i}')
-    #         print(f'{(class_array_1.shape)}')
-    #         print(f'{(class_array_2.shape)}')
-    #         if self.type == 'horizontal':
-    #             np.concatenate((class_array_1, class_array_2), axis=0)
-
-
 
     def combine_datasets(self, _datasets: list[EncodedDataset] = None):
         datasets = self.original_datasets if not _datasets else _datasets
@@ -150,15 +112,6 @@ class JoinedEncodedDataset(Dataset):
             new_encoded_datasets.append(joined)
         self.encoded_datasets = new_encoded_datasets
         return new_encoded_datasets
-        # for i, dataset in enumerate(datasets):
-        #     print(f'+++ Encoded Dataset Type: {i} +++')
-        #     print(type(dataset))
-        # for j, class_dataset in enumerate(dataset.encoded_datasets):
-        #     print(f'Encoded Dataset Type: {i} - Class {j}')
-        #     print(f'{type(class_dataset)} with shape: {class_dataset.shape}\n', class_dataset[:1])
-        # print(dataset, type(dataset.encoded_datasets), f'n_class: {len(dataset.encoded_datasets)}\n',
-        # dataset.encoded_datasets)
-
 
 
 class IntegerSeqEncoder(EncodedDataset):
