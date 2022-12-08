@@ -6,9 +6,11 @@ from sklearn.model_selection import StratifiedKFold
 from promoter_dataset.seq_encoders import *
 
 from icecream import ic as ic
+
 # ic.disable()
 
 SEED = 17
+
 
 class DatasetManager(object):
 
@@ -21,17 +23,19 @@ class DatasetManager(object):
         self.X = None
         self.y = None
 
-    def transform_raw_datasets(self, params: list[dict]) -> list[EncodedDataset]:
+    def transform_raw_dataset(self, params: list[dict]) -> list[EncodedDataset]:
         """ Iterate over each parameter set and process raw data, transforming it into new encoded and
         sliced feature dataset.
 
         :param params: List of parameters to configure the data transforming.
         """
+
         def transform_dataset(p: dict) -> EncodedDataset:
+            # Extract parameters from dict
             k = p['k']
             encode_type = p['encode']
             slice_positions = p['slice']
-
+            # Encode single dataset
             d = self.raw_dataset_manager.encode_datasets(
                 encoder_type=encode_type,
                 slice=slice_positions,
@@ -41,23 +45,36 @@ class DatasetManager(object):
 
             return d
 
+        # Apply each encoding function to corresponding datasets
         datasets: list[EncodedDataset] = [transform_dataset(p) for p in params]
-
+        # Set attribute
         self.datasets = datasets
 
         return datasets
 
     def setup_partitions(self, n_splits, verbose: bool = True) -> StratifiedKFold:
+        """ Setup object partitions index and iterators.
+
+        :param n_splits: The number of partitions to set.
+        :param verbose:
+        :return: sklearn partition object
+        """
         ic.enable() if verbose else ic.disable()
+        # Setup partition object from sklearn
         self.partitions = StratifiedKFold(n_splits=n_splits, random_state=SEED, shuffle=True)
-        X = self.datasets[0].encoded_datasets
+        # Define X as first dataset, only to get the number of classes and setup y
+        X = self.datasets[0].encoded_classes_datasets
+        # Setup y with class labels
         y = np.concatenate([np.full(c.shape[0], fill_value=i) for i, c in enumerate(X)], axis=0)
-        X = np.concatenate(self.datasets[0].encoded_datasets, axis=0)
+        # Setup definitive X with all datasets
+        X = np.concatenate(self.datasets[0].encoded_classes_datasets, axis=0)
+        # Setup object attributes
         self.X = X
         self.y = y
         ic(X, type(X), len(X))
         ic(y, type(y), len(y))
 
+        # Create partitions index and iterators
         self.partitions.get_n_splits(X, y)
 
         ic.disable() if verbose else None
@@ -67,18 +84,20 @@ class DatasetManager(object):
         ic.enable() if verbose else ic.disable()
         for i, (train_index, test_index) in enumerate(self.partitions.split(self.X, self.y)):
             ic(f'Split {i}')
-            ic(train_index, test_index)
+            # ic(train_index, test_index)
+
+            for i, d in enumerate(self.datasets):
+                ic(f'Dataset type {i}', d.encode_type)
+                for j, c in enumerate(d.encoded_classes_datasets):
+                    ic(f'Class {j}', c.shape)
 
         ic.disable() if verbose else None
 
 
-
-
-
 class RawDatasetManager(object):
-    ''' DatasetManager is responsible for manager a single nucleotide dataset.
+    """ DatasetManager is responsible for manager a single nucleotide dataset.
     It applies a specific encoding function on each of the problem class datasets.
-    '''
+    """
 
     def __init__(self, fasta_paths: tuple[str] = None) -> None:
         self.fasta_paths = fasta_paths

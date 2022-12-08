@@ -34,14 +34,14 @@ def main() -> None:
     pos_fasta = './data/raw-fasta/Bacillus_pos.fa'
     neg_fasta = './data/raw-fasta/Bacillus_neg.fa'
     data_manager = dm.DatasetManager(fasta_paths=(pos_fasta, neg_fasta))
-    data_manager.transform_raw_datasets(args.data)
+    data_manager.transform_raw_dataset(args.data)
     data_manager.setup_partitions(n_splits=5)
     data_manager.get_next_split()
 
-    joined: se.Dataset = se.MergedEncodedDataset(data_manager.datasets)
-    print(joined)
-    for i in joined.encoded_datasets:
-        print(i.shape)
+    # joined: se.Dataset = se.MergedEncodedDataset(data_manager.datasets)
+    # print(joined)
+    # for i in joined.encoded_datasets:
+    #     print(i.shape)
 
 
 

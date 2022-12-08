@@ -55,7 +55,7 @@ class EncodedDataset(Dataset):
         self.encode_type = encode_type
         self.slice = slice
         self.discard_invalids = discard_invalids
-        self.encoded_datasets = self.fit_transform()
+        self.encoded_classes_datasets = self.fit_transform()
 
     def get_k_mers(self, sequence: str, k: int, step: int):
         n = len(sequence) - k + 1
@@ -103,11 +103,11 @@ class MergedEncodedDataset(Dataset):
             return datasets[0]
         elif n_encode_types <= 1:
             raise Exception
-        n_class = len(datasets[0].encoded_datasets)
+        n_class = len(datasets[0].encoded_classes_datasets)
         _axis = 0 if self.type == 'vertical' else 1
         new_encoded_datasets = list()
         for c in range(n_class):
-            _datasets = [d.encoded_datasets[c] for d in datasets]
+            _datasets = [d.encoded_classes_datasets[c] for d in datasets]
             joined = np.concatenate(_datasets, axis=_axis)
             new_encoded_datasets.append(joined)
         self.encoded_datasets = new_encoded_datasets

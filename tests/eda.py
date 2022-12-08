@@ -17,7 +17,7 @@ def plot_prop_correlation(datasets):
 
         fig, axes = plt.subplots(3, 2, figsize=(15, 5), sharey=True)
         fig.suptitle(f'Property: {prop_name}')
-        for class_idx, dataset in enumerate(datasets.encoded_datasets):
+        for class_idx, dataset in enumerate(datasets.encoded_classes_datasets):
             print(f'{class_idx}')
             prop_data = get_prop_data(dataset, prop_idx)
             dataset_name = class_names[class_idx]
@@ -76,10 +76,10 @@ def plot_prop_x_prop(class_datasets):
     # plot_prop_correlation(class_datasets)
 
     prop = 1
-    X1 = class_datasets.encoded_datasets[0][prop, :, :]
+    X1 = class_datasets.encoded_classes_datasets[0][prop, :, :]
     y1 = np.zeros(X1.shape[0])
 
-    X2 = class_datasets.encoded_datasets[1][prop, :, :]
+    X2 = class_datasets.encoded_classes_datasets[1][prop, :, :]
     y2 = np.full(X2.shape[0], fill_value=1)
 
     X3 = np.vstack((X1, X2))
@@ -107,9 +107,9 @@ def plot_prop_x_prop(class_datasets):
     pos = 60
     propA = 3
     propB = 5
-    X1 = class_datasets.encoded_datasets[0][:, :, pos]
+    X1 = class_datasets.encoded_classes_datasets[0][:, :, pos]
     X1 = np.moveaxis(X1, [0, 1], [1, 0])
-    X2 = class_datasets.encoded_datasets[1][:, :, pos]
+    X2 = class_datasets.encoded_classes_datasets[1][:, :, pos]
     X2 = np.moveaxis(X2, [0, 1], [1, 0])
     X3 = np.vstack((X1, X2))
     X_train = pd.DataFrame(X3)
