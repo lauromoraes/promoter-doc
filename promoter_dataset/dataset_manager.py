@@ -78,50 +78,22 @@ class DatasetManager(object):
         ic.disable() if verbose else None
         return self.partitions
 
-    def merge_class_samples(self, class_samples, class_labels=None):
-        n_samples = np.sum([c.shape[0] for c in class_samples])
-        n_cols = class_samples[0].shape[1]
-        n_class = len(class_samples)
-
-        X_shape = (n_samples, n_cols)
-        y_shape = (n_samples, )
-
-        _X = np.zeros(X_shape)
-        _y = np.zeros(y_shape)
-
-        cnt = 0
-        for i, _samples in enumerate(class_samples):
-            n_class_samples = _samples.shape[0]
-            start, end = cnt, cnt + n_class_samples
-            cnt += n_class_samples
-            # label = class_labels[i] if class_labels else i
-            label = i
-            _y[start:end] = label
-            _X[start:end, :] = _samples
-
-        return _X, _y
 
     def get_next_split(self, verbose: bool = True):
         ic.enable() if verbose else ic.disable()
         for i, (train_i, test_i) in enumerate(self.partitions.split(self.X[0], self.y)):
             ic('Split', i)
-            for i, d in enumerate(self.datasets):
-                ic(f'Dataset type {i}', d.encode_type)
+            # Setup X
+            _X_train = [x[train_i] for x in self.X]
+            _X_test = [x[test_i] for x in self.X]
+            _X = (_X_train, _X_test)
 
-                # Setup X
-                _X_train = [x[train_i] for x in self.X]
-                _X_test = [x[test_i] for x in self.X]
-                _X = (_X_train, _X_test)
-
-                # Setup y
-                _y_train = self.y[train_i]
-                _y_test = self.y[test_i]
-                _y = (_y_train, _y_test)
-
-        ic(_X, len(_X[0]), len(_X[1]))
-        ic(_y, np.unique(_y[0], return_counts=True), np.unique(_y[1], return_counts=True))
-        ic.disable() if verbose else None
-        return _X, _y
+            # Setup y
+            _y_train = self.y[train_i]
+            _y_test = self.y[test_i]
+            _y = (_y_train, _y_test)
+            ic(np.unique(_y[0], return_counts=True), np.unique(_y[1], return_counts=True))
+            yield _X, _y
 
 class RawDatasetManager(object):
     """ DatasetManager is responsible for manager a single nucleotide dataset.

@@ -36,7 +36,9 @@ def main() -> None:
     data_manager = dm.DatasetManager(fasta_paths=(pos_fasta, neg_fasta))
     data_manager.transform_raw_dataset(args.data)
     data_manager.setup_partitions(n_splits=5)
-    data_manager.get_next_split()
+    for X, y in data_manager.get_next_split():
+        ic(X)
+        ic(y)
 
     # joined: se.Dataset = se.MergedEncodedDataset(data_manager.datasets)
     # print(joined)
