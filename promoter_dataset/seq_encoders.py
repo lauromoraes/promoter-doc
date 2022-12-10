@@ -189,13 +189,10 @@ class PropertyEncoder(EncodedDataset):
         :param step:
         :return:
         """
-        ic.disable()
         sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
         prop_data = self.get_prop_data(k)
         prop_idx = prop_data.index
         encoded = np.array([np.array([prop_data[mer] for mer in sequence]) for sequence in sequences_mers])
         encoded = encoded.swapaxes(0, 2)
         encoded = encoded.swapaxes(1, 2)
-        ic(encoded, encoded.shape)
-        ic.enable()
         return encoded

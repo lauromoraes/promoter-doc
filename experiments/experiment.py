@@ -9,6 +9,11 @@ from sklearn import metrics
 
 from icecream import ic as ic
 
+import logging
+import sys
+
+
+
 class Experiment(object):
     def __init__(self, name: str, dataset_manager: DatasetManager):
         self.experiment_name = name
@@ -17,8 +22,11 @@ class Experiment(object):
 
 
     @abc.abstractmethod
-    def setup(self):
+    def setup(self, ):
         pass
 
     def exec(self):
-        pass
+        _dm = self.data_manager
+        i = 0
+        for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
+            print(f'Split: {(i := i+1)}')

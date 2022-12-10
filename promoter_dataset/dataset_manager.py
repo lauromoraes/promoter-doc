@@ -7,8 +7,6 @@ from promoter_dataset.seq_encoders import *
 
 from icecream import ic as ic
 
-# ic.disable()
-
 SEED = 17
 
 
@@ -59,7 +57,6 @@ class DatasetManager(object):
         :param verbose:
         :return: sklearn partition object
         """
-        ic.enable() if verbose else ic.disable()
         # Setup partition object from sklearn
         self.partitions = StratifiedKFold(n_splits=n_splits, random_state=SEED, shuffle=True)
         # Setup X with all datasets samples
@@ -75,14 +72,10 @@ class DatasetManager(object):
         # Create partitions index and iterators
         self.partitions.get_n_splits(self.X[0], self.y)
 
-        ic.disable() if verbose else None
         return self.partitions
 
-
     def get_next_split(self, verbose: bool = True):
-        ic.enable() if verbose else ic.disable()
         for i, (train_i, test_i) in enumerate(self.partitions.split(self.X[0], self.y)):
-            ic('Split', i)
             # Setup X
             _X_train = [x[train_i] for x in self.X]
             _X_test = [x[test_i] for x in self.X]
@@ -92,8 +85,8 @@ class DatasetManager(object):
             _y_train = self.y[train_i]
             _y_test = self.y[test_i]
             _y = (_y_train, _y_test)
-            ic(np.unique(_y[0], return_counts=True), np.unique(_y[1], return_counts=True))
             yield _X, _y
+
 
 class RawDatasetManager(object):
     """ DatasetManager is responsible for manager a single nucleotide dataset.
@@ -146,9 +139,6 @@ class RawDatasetManager(object):
         :param verbose:
         :return: EncodedDataset
         """
-
-        ic.enable() if verbose else ic.disable()
-
         args = {
             'raw_datasets': self.raw_datasets,
             'k': k,
@@ -156,7 +146,6 @@ class RawDatasetManager(object):
             'encode_type': encoder_type,
             'slice': slice
         }
-        # ic(args)
 
         if encoder_type == 'label':
             encoded = IntegerSeqEncoder(**args)
@@ -166,7 +155,4 @@ class RawDatasetManager(object):
             encoded = PropertyEncoder(**args)
         else:
             print(f'Invalid encode type: {encoder_type}.')
-        # ic(encoded)
-
-        ic.disable() if verbose else None
         return encoded
