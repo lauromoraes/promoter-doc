@@ -26,7 +26,7 @@ import statsmodels.api as sm
 from promoter_dataset import dataset_manager as dm
 from promoter_dataset import seq_encoders as se
 
-import mlflow
+# import mlflow
 import dvc
 
 matplotlib.use('TkAgg')
@@ -38,8 +38,8 @@ def main() -> None:
     args: Namespace = get_args()
 
     # Prepare dataset object
-    pos_fasta = './data/raw-fasta/Bacillus_pos.fa'
-    neg_fasta = './data/raw-fasta/Bacillus_neg.fa'
+    pos_fasta = './data/raw-data/fasta/Bacillus_pos.fa'
+    neg_fasta = './data/raw-data/fasta/Bacillus_neg.fa'
     data_manager = dm.DatasetManager(fasta_paths=(pos_fasta, neg_fasta))
     data_manager.transform_raw_dataset(args.data)
     data_manager.setup_partitions(n_splits=10)
