@@ -26,9 +26,8 @@ import statsmodels.api as sm
 from promoter_dataset import dataset_manager as dm
 from promoter_dataset import seq_encoders as se
 
-import logger.logger as logger
-from views.plots import plot_roc, plot_confusion
-log = logger.get_logger(__name__)
+import mlflow
+import dvc
 
 matplotlib.use('TkAgg')
 matplotlib.use('Qt5Agg')
@@ -80,7 +79,6 @@ def main() -> None:
         # View the classification report for test data and predictions
         report = classification_report(y_test, y_pred_test)
         ic(report)
-        log.debug(report)
 
         # # View ROC curve
         # plot_roc(fp_rate, tp_rate)
@@ -93,7 +91,7 @@ def main() -> None:
     # ic(np.mean(all_scores), np.std(all_scores))
 
     df = pd.Series(all_scores)
-    ic(df.mean(), df.std())
+    ic(df, df.mean(), df.std())
     ic(df.describe())
 
     plt.Figure()
