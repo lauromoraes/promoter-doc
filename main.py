@@ -1,33 +1,25 @@
 # -*- coding: utf-8 -*-
 
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import os
 import matplotlib
 import matplotlib.pyplot as plt
 from argparse import Namespace
-from utils.arguments import get_args
+from src.utils.arguments import get_args
 from icecream import ic as ic
-from sklearn.manifold import TSNE
-from numpy import reshape
 import seaborn as sns
 import pandas as pd
-import numpy as np
 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.metrics import roc_curve, roc_auc_score
 
-
 from sklearn.ensemble import RandomForestClassifier
 
-import statsmodels.api as sm
+from src.datamanager import dataset_manager as dm
 
-
-from promoter_dataset import dataset_manager as dm
-from promoter_dataset import seq_encoders as se
-
-# import mlflow
-import dvc
+import mlflow
+import mlflow.sklearn
 
 matplotlib.use('TkAgg')
 matplotlib.use('Qt5Agg')
@@ -47,7 +39,7 @@ def main() -> None:
     all_scores = list()
     i = 0
     for (X_train, X_test), (y_train, y_test) in data_manager.get_next_split():
-        ic(f'Split: {(i := i+1)}')
+        ic(f'Split: {(i := i + 1)}')
 
         # # Log number of samples per class
         # ic(np.unique(y_train, return_counts=True),
@@ -56,19 +48,21 @@ def main() -> None:
         # Instantiate and fit the Classifier
         clf = RandomForestClassifier(max_depth=2,
                                      random_state=0)
-        clf = GradientBoostingClassifier(n_estimators=100,
-                                         learning_rate=1.0,
-                                         max_depth=1,
-                                         random_state=0)
+        _params = {
+            'n_estimators': 100,
+            'learning_rate': 1.0,
+            'max_depth': 1,
+            'random_state': 0
+        }
+        clf = GradientBoostingClassifier(**_params)
         clf.fit(X_train[0], y_train)
 
         # Make predictions for the test set
         y_pred_test = clf.predict(X_test[0])
-        pred_probs = clf.predict_proba(X_test[0])[:,1]
+        pred_probs = clf.predict_proba(X_test[0])[:, 1]
 
         fp_rate, tp_rate, threshold1 = roc_curve(y_test, pred_probs)
         print('roc_auc_score: ', roc_auc_score(y_test, pred_probs))
-
 
         # Calculate accuracy score
         _score = accuracy_score(y_test, y_pred_test)
@@ -85,27 +79,29 @@ def main() -> None:
         # # View confusion matrix for test data and predictions
         # plot_confusion(y_test, y_pred_test)
 
-
-
-
     # ic(np.mean(all_scores), np.std(all_scores))
 
     df = pd.Series(all_scores)
     ic(df, df.mean(), df.std())
     ic(df.describe())
 
+    mlflow.set_experiment("xboost-exp")
+    with mlflow.start_run():
+        mlflow.log_params(
+            {"model_name": "GradientBoostingClassifier"} | _params
+        )
+        mlflow.log_metrics({"accuracy_mean": df.mean(), })
+        model_path = os.path.join(os.getcwd(), 'models', 'model-GradientBoostingClassifier')
+        mlflow.sklearn.save_model(clf, model_path)
+
     plt.Figure()
     sns.boxplot(df, color=sns.color_palette("Set2")[0])
     plt.show()
-
 
     # joined: se.Dataset = se.MergedEncodedDataset(data_manager.datasets)
     # print(joined)
     # for i in joined.encoded_datasets:
     #     print(i.shape)
-
-
-
 
 
 if __name__ == '__main__':
