@@ -1,6 +1,8 @@
 import abc
-from src.datamanager import DatasetManager
+from src.datamanager.dataset_manager import DatasetManager
 
+import mlflow
+import mlflow.sklearn
 
 class Experiment(object):
     def __init__(self, name: str, dataset_manager: DatasetManager):
@@ -15,6 +17,8 @@ class Experiment(object):
 
     def exec(self):
         _dm = self.data_manager
-        i = 0
-        for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
-            print(f'Split: {(i := i+1)}')
+        mlflow.set_experiment(self.experiment_name)
+        with mlflow.start_run(description=f'Parent run for {self.experiment_name}.'):
+            i = 0
+            for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
+                print(f'Split: {(i := i+1)}')
