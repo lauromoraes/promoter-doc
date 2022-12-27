@@ -1,4 +1,5 @@
 import abc
+import importlib
 import mlflow
 import mlflow.sklearn
 from argparse import Namespace
@@ -6,7 +7,6 @@ from argparse import Namespace
 from rich.console import Console
 
 from src.datamanager.dataset_manager import FeaturesManager
-
 
 class Experiment(object):
     def __init__(self, exp_args: Namespace = None):
@@ -20,7 +20,12 @@ class Experiment(object):
     def set_models(self):
         models_args = self.exp_args.models_params
         for m_args in models_args:
-            print(m_args['model_type'])
+            m_type = m_args['model_type']
+            m_lib = m_args['lib']
+            m_params = m_args['params']
+            model_class = getattr(importlib.import_module(m_lib), m_type)
+            model = model_class(**m_params)
+            print(model)
 
     def set_features(self):
         raw_data_paths = [x['path'] for x in self.exp_args.datasets]

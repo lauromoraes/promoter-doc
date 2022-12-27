@@ -21,6 +21,7 @@ from src.datamanager import dataset_manager as dm
 import mlflow
 import mlflow.sklearn
 
+import importlib
 
 from src.experiments.experiment import Experiment
 from src.utils.arguments import get_args
@@ -33,6 +34,15 @@ def main() -> None:
     print(f'START MAIN FUNCTION')
     args: Namespace = get_args()
     ic(args)
+    # clf = getattr(importlib.import_module('sklearn.ensemble'), 'GradientBoostingClassifier')
+    # _params = {
+    #             'n_estimators': 100,
+    #             'learning_rate': 1.0,
+    #             'max_depth': 1,
+    #             'random_state': 0
+    #         }
+    # clf = clf(**_params)
+    # ic(clf)
     exp = Experiment(exp_args = args)
 
 
