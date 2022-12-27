@@ -5,7 +5,7 @@ from src.datamanager.seq_encoders import *
 SEED = 17
 
 
-class DatasetManager(object):
+class FeaturesManager(object):
 
     def __init__(self, fasta_paths: tuple[str] = None):
         self.fasta_paths = fasta_paths
@@ -84,7 +84,7 @@ class DatasetManager(object):
 
 
 class RawDatasetManager(object):
-    """ DatasetManager is responsible for manager a single nucleotide dataset.
+    """ FeaturesManager is responsible for manager a single nucleotide dataset.
     It applies a specific encoding function on each of the problem class datasets.
     """
 

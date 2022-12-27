@@ -1,18 +1,21 @@
-organism: Bacillus
-model_type: HotCNNHyperModel
+experiment_name: GradientBoostingExp-01
+experiment_type: GradientBoostingExp
 cv: 5
-epochs: 50
 n_samples: 1
-bach_size: 32
-fasta_dir: fasta
-weights_dir: weights
-best_weights_dir: best_weights
-base_results_dir: results
 debug: 1
-data:
+dataset_organism: Bacillus
+datasets:
+  - class_name: promoter
+    path: data/raw-data/fasta/Bacillus_pos.fa
+  - class_name: non-promoter
+    path: data/raw-data/fasta/Bacillus_neg.fa
+features:
   - k: 1
     encode: label
     slice: [59, 20, 20]
-hypermodel:
-  execution_per_trial: 3
-  hyperband_max_epochs: 30
+models_params:
+  - model_type: GradientBoostingClassifier
+    n_estimators: 100
+    learning_rate: 0.1
+    max_depth: 1
+    random_state: 0
