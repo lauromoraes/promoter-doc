@@ -1,4 +1,5 @@
 experiment_name: GradientBoostingExp-01
+experiment_version: v0.0.1
 experiment_type: GradientBoostingExp
 cv: 5
 n_samples: 1
@@ -14,8 +15,8 @@ features:
     encode: label
     slice: [59, 20, 20]
 models_params:
-  - model_type: GradientBoostingClassifier
-    lib: sklearn.ensemble
+  - model_name: GradientBoostingClassifier
+    module: sklearn.ensemble
     params:
       n_estimators: 100
       learning_rate: 0.1

@@ -33,17 +33,8 @@ matplotlib.use('Qt5Agg')
 def main() -> None:
     print(f'START MAIN FUNCTION')
     args: Namespace = get_args()
-    ic(args)
-    # clf = getattr(importlib.import_module('sklearn.ensemble'), 'GradientBoostingClassifier')
-    # _params = {
-    #             'n_estimators': 100,
-    #             'learning_rate': 1.0,
-    #             'max_depth': 1,
-    #             'random_state': 0
-    #         }
-    # clf = clf(**_params)
-    # ic(clf)
-    exp = Experiment(exp_args = args)
+    exp = Experiment(exp_args=args)
+    exp.exec()
 
 
 
@@ -124,8 +115,8 @@ if __name__ == '__main__':
     #     # Log metrics to remote MLFlow
     #     mlflow.log_metrics({"accuracy_mean": cv_scores_df.mean(), })
     #
-    #     # Save model if it not exists yet
-    #     model_path = os.path.join(os.getcwd(), 'models', 'model-GradientBoostingClassifier')
+    #     # Save models if it not exists yet
+    #     model_path = os.path.join(os.getcwd(), 'models', 'models-GradientBoostingClassifier')
     #     if not os.path.isdir(model_path):
     #         mlflow.sklearn.save_model(clf, model_path)
     #
