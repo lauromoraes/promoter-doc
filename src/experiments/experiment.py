@@ -8,6 +8,7 @@ from rich.console import Console
 
 from src.datamanager.dataset_manager import FeaturesManager
 
+console = Console(color_system="windows")
 
 class Experiment(object):
     def __init__(self, exp_args: Namespace = None):
@@ -72,9 +73,16 @@ class Experiment(object):
 
     # @abc.abstractmethod
     def train(self, X, y):
-        model = None
-
-        return model
+        for model in self.models:
+            console.print(f"Training model:\n\t{model}")
+            model_type = str(type(model))
+            if 'sklearn' in model_type:
+                console.print('Training a Sklearn model')
+                model.fit(X[0], y)
+            elif 'tensorflow' in model_type:
+                console.print('Training a Tensorflow model')
+                model.fit(X, y)
+        return self.models
 
     def calculate_metrics(self, y, y_pred):
         metrics = dict()
@@ -86,30 +94,47 @@ class Experiment(object):
         return y_pred
 
     def exec(self):
-        console = Console()
         _dm = self.features_manager
         console.rule(f'Starting experiment: {self.experiment_name}')
+        mlflow.sklearn.autolog()
 
-        experiment_id = mlflow.create_experiment(self.experiment_name)
+        # Create or load experiment by the name in the config file
+        try:
+            mlflow_experiment = dict(mlflow.get_experiment_by_name(self.experiment_name))
+            experiment_id = mlflow_experiment['experiment_id']
+            console.print(f'Experiment already exists! Loading ([red]ID {experiment_id}[/red])')
+            console.print(mlflow_experiment)
+        except Exception as e:
+            experiment_id = mlflow.create_experiment(self.experiment_name)
+            console.print(e)
+            console.print(f'New Experiment created ([red]ID {experiment_id}[/red])')
+
+        # Setup experiment for data splits
         with mlflow.start_run(
                 experiment_id=experiment_id,
                 tags={'version': self.exp_args.experiment_version},
                 description=f'Parent run for {self.experiment_name}.',
         ) as parent_run:
+            console.print(f"Starting Experiment", justify="center", style='red')
             # Prepare features
             self.set_features()
+            exp_params = {}
+            mlflow.log_params(params=exp_params, )
 
+            # Setup splits
             run_idx = 0
             for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
-                run_idx += 1
+
+                # Setup run for one split
                 with mlflow.start_run(
                         experiment_id=experiment_id,
                         run_name=f'SPLIT_{run_idx}',
                         nested=True,
                         description=f'Child run {self.experiment_name}.',
                 ) as run:
-                    console.print(f'Split: {(run_idx := run_idx + 1)}', style='blue')
-
+                    console.rule(f"Running split: [red]{(run_idx := run_idx + 1)}[/red]")
+                    # Execute TRAINING step
                     model = self.train(X_train, y_train)
-
+                    # Execute TEST step
                     self.test(model, X_test, y_test)
+
