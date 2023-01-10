@@ -4,6 +4,8 @@ import mlflow
 import mlflow.sklearn
 from argparse import Namespace
 
+import numpy as np
+import sklearn.metrics as skmetrics
 from rich.console import Console
 
 from src.datamanager.dataset_manager import FeaturesManager
@@ -85,17 +87,42 @@ class Experiment(object):
         return self.models
 
     def calculate_metrics(self, y, y_pred):
-        metrics = dict()
+        metrics = {
+            'f1': skmetrics.f1_score(y, y_pred),
+            'precision': skmetrics.precision_score(y, y_pred),
+            'recall': skmetrics.recall_score(y, y_pred),
+            'acc': skmetrics.accuracy_score(y, y_pred),
+            'roc_auc': skmetrics.roc_auc_score(y, y_pred),
+        }
         return metrics
 
+    def aggregate_metrics(self, splits_metrics):
+        mean_metrics = {m: np.mean for m in splits_metrics[0].keys()}
+        for metric in mean_metrics.keys():
+            values = [s[metric] for s in splits_metrics]
+            mean_metrics[metric] = np.mean(values)
+        return mean_metrics
+
     # @abc.abstractmethod
-    def test(self, model, X, y):
+    def test(self, model, X):
         y_pred = None
+        predictions = list()
+        for model in self.models:
+            console.print(f"Testing model:\n\t{model}")
+            model_type = str(type(model))
+            if 'sklearn' in model_type:
+                console.print('Testing a Sklearn model')
+                pred = model.predict(X[0])
+            elif 'tensorflow' in model_type:
+                console.print('Testing a Tensorflow model')
+                model.fit(X)
+            predictions.append(pred)
+        y_pred = np.amax(predictions, 0)
         return y_pred
 
     def exec(self):
         _dm = self.features_manager
-        console.rule(f'Starting experiment: {self.experiment_name}')
+        console.rule(f'Starting experiment: [red]{self.experiment_name}[/red]')
         mlflow.sklearn.autolog()
 
         # Create or load experiment by the name in the config file
@@ -115,12 +142,12 @@ class Experiment(object):
                 tags={'version': self.exp_args.experiment_version},
                 description=f'Parent run for {self.experiment_name}.',
         ) as parent_run:
-            console.print(f"Starting Experiment", justify="center", style='red')
+            console.print(f"Starting Training/Test", justify="center", style='red')
             # Prepare features
             self.set_features()
             exp_params = {}
             mlflow.log_params(params=exp_params, )
-
+            splits_metrics = list()
             # Setup splits
             run_idx = 0
             for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
@@ -133,8 +160,16 @@ class Experiment(object):
                         description=f'Child run {self.experiment_name}.',
                 ) as run:
                     console.rule(f"Running split: [red]{(run_idx := run_idx + 1)}[/red]")
+
                     # Execute TRAINING step
                     model = self.train(X_train, y_train)
-                    # Execute TEST step
-                    self.test(model, X_test, y_test)
 
+                    # Execute TEST step
+                    y_pred = self.test(model, X_test)
+                    metrics = self.calculate_metrics(y_test, y_pred)
+                    console.print(metrics)
+                    splits_metrics.append(metrics)
+
+            exp_metrics = self.aggregate_metrics(splits_metrics)
+            console.rule('Experiment mean metrics', style='blue')
+            console.print(exp_metrics)
