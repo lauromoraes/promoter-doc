@@ -12,6 +12,7 @@ from src.datamanager.dataset_manager import FeaturesManager
 
 console = Console(color_system="windows")
 
+
 class Experiment(object):
     def __init__(self, exp_args: Namespace = None):
         self.exp_args = exp_args
@@ -151,7 +152,6 @@ class Experiment(object):
             # Setup splits
             run_idx = 0
             for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
-
                 # Setup run for one split
                 with mlflow.start_run(
                         experiment_id=experiment_id,

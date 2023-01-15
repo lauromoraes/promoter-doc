@@ -175,7 +175,8 @@ class PropertyEncoder(EncodedDataset):
             file_path = 'trinuc'
         else:
             raise ValueError(f'k value must be 2 or 3, received {k}')
-        file_path = os.path.join(os.getcwd(), 'data', 'physicochemical-properties-reference', f'{file_path}.tsv')
+        file_path = os.path.join(os.getcwd(), '..', 'data', 'raw-data', 'physicochemical-properties-reference',
+                                 f'{file_path}.tsv')
         prop_data = pd.read_csv(file_path, sep='\t', index_col=0)
         self.prop_index = prop_data.index
         return prop_data
