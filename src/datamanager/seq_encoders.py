@@ -82,6 +82,7 @@ class EncodedDataset(Dataset):
         for dataset in self.raw_datasets:
             if self.slice:
                 dataset = [s[upstream:downstream] for s in dataset]
+                print(dataset)
                 dataset = self.transform_sequences(sequences=dataset, k=self.k, step=self.step)
             datasets.append(dataset)
         return datasets
@@ -144,7 +145,7 @@ class OneHotSeqEncoder(EncodedDataset):
         from tensorflow.keras.utils import to_categorical
 
         def encode(seq):
-            return to_categorical(seq, num_classes=4 ** k, dtype='int32').T
+            return to_categorical(seq, num_classes=4**k, dtype='int32').T
 
         sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
         label_encoder = self.get_k_mers_encoder(k)

@@ -1,0 +1,24 @@
+experiment_name: EDA-NUC-K1
+experiment_version: v0.0.1
+experiment_type: GradientBoostingExp
+cv: 5
+n_samples: 1
+debug: 1
+dataset_organism: Bacillus
+datasets:
+  - class_name: promoter
+    path: data/raw-data/fasta/Bacillus_pos.fa
+  - class_name: non-promoter
+    path: data/raw-data/fasta/Bacillus_neg.fa
+features:
+  - k: 1
+    encode: onehot
+    slice: [59, 20, 20]
+models_params:
+  - model_name: GradientBoostingClassifier
+    module: sklearn.ensemble
+    params:
+      n_estimators: 100
+      learning_rate: 0.1
+      max_depth: 1
+      random_state: 0
