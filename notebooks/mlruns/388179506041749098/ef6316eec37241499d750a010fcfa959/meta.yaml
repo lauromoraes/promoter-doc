@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/ef6316eec37241499d750a010fcfa959/artifacts
+end_time: 1684147877685
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: ef6316eec37241499d750a010fcfa959
+run_name: Naive Bayes
+run_uuid: ef6316eec37241499d750a010fcfa959
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684147877218
+status: 3
+tags: []
+user_id: lauro

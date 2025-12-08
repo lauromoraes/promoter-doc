@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/607bf3cb33ac4422aad9a843d0c1c783/artifacts
+end_time: 1684081356091
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 607bf3cb33ac4422aad9a843d0c1c783
+run_name: Extreme Gradient Boosting
+run_uuid: 607bf3cb33ac4422aad9a843d0c1c783
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684081355490
+status: 3
+tags: []
+user_id: lauro

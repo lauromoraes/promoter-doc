@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/ca65877e382d43e08adf0e930b32d352/artifacts
+end_time: 1684247855840
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: ca65877e382d43e08adf0e930b32d352
+run_name: Dummy Classifier
+run_uuid: ca65877e382d43e08adf0e930b32d352
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684247855516
+status: 3
+tags: []
+user_id: lauro

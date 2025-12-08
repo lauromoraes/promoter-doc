@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/12a5363351864c3f81730ad95d3d0877/artifacts
+end_time: 1684247855014
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 12a5363351864c3f81730ad95d3d0877
+run_name: SVM - Linear Kernel
+run_uuid: 12a5363351864c3f81730ad95d3d0877
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684247854669
+status: 3
+tags: []
+user_id: lauro

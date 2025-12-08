@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/445201200452659442/2a3f40c0297f4f86a13b9f0d2e155fba/artifacts
+end_time: 1684263172389
+entry_point_name: ''
+experiment_id: '445201200452659442'
+lifecycle_stage: active
+run_id: 2a3f40c0297f4f86a13b9f0d2e155fba
+run_name: SVM - Radial Kernel
+run_uuid: 2a3f40c0297f4f86a13b9f0d2e155fba
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684263121112
+status: 3
+tags: []
+user_id: lauro

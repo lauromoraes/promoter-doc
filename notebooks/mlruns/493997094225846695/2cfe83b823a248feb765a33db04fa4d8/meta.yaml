@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/493997094225846695/2cfe83b823a248feb765a33db04fa4d8/artifacts
+end_time: 1684260670935
+entry_point_name: ''
+experiment_id: '493997094225846695'
+lifecycle_stage: active
+run_id: 2cfe83b823a248feb765a33db04fa4d8
+run_name: Session Initialized f125
+run_uuid: 2cfe83b823a248feb765a33db04fa4d8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684259739682
+status: 3
+tags: []
+user_id: lauro

@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/3134bd5536544fb8b24a2a7f7d271cd6/artifacts
+end_time: 1684001111264
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 3134bd5536544fb8b24a2a7f7d271cd6
+run_name: Extra Trees Classifier
+run_uuid: 3134bd5536544fb8b24a2a7f7d271cd6
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684001111163
+status: 3
+tags: []
+user_id: lauro

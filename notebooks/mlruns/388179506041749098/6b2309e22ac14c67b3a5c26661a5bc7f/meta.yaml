@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/6b2309e22ac14c67b3a5c26661a5bc7f/artifacts
+end_time: 1684006331230
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 6b2309e22ac14c67b3a5c26661a5bc7f
+run_name: Light Gradient Boosting Machine
+run_uuid: 6b2309e22ac14c67b3a5c26661a5bc7f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684006330885
+status: 3
+tags: []
+user_id: lauro

@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/2548ed40a9154d00aa2e87a04c5005fc/artifacts
+end_time: 1684147881191
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 2548ed40a9154d00aa2e87a04c5005fc
+run_name: Decision Tree Classifier
+run_uuid: 2548ed40a9154d00aa2e87a04c5005fc
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684147880855
+status: 3
+tags: []
+user_id: lauro

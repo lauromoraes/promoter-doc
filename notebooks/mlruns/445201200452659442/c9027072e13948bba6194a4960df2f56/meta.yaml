@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/445201200452659442/c9027072e13948bba6194a4960df2f56/artifacts
+end_time: 1684262763920
+entry_point_name: ''
+experiment_id: '445201200452659442'
+lifecycle_stage: active
+run_id: c9027072e13948bba6194a4960df2f56
+run_name: K Neighbors Classifier
+run_uuid: c9027072e13948bba6194a4960df2f56
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684262744877
+status: 3
+tags: []
+user_id: lauro

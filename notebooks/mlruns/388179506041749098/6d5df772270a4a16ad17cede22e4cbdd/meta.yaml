@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/6d5df772270a4a16ad17cede22e4cbdd/artifacts
+end_time: 1684081358650
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 6d5df772270a4a16ad17cede22e4cbdd
+run_name: Ridge Classifier
+run_uuid: 6d5df772270a4a16ad17cede22e4cbdd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684081358338
+status: 3
+tags: []
+user_id: lauro

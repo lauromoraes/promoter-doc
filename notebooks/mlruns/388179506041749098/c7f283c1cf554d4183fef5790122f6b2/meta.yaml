@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/c7f283c1cf554d4183fef5790122f6b2/artifacts
+end_time: 1684001337359
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: c7f283c1cf554d4183fef5790122f6b2
+run_name: Gradient Boosting Classifier
+run_uuid: c7f283c1cf554d4183fef5790122f6b2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684001337022
+status: 3
+tags: []
+user_id: lauro

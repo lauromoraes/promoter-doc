@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/7ce411a9f1084c199d02071a1536c491/artifacts
+end_time: 1684010211426
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 7ce411a9f1084c199d02071a1536c491
+run_name: Linear Discriminant Analysis
+run_uuid: 7ce411a9f1084c199d02071a1536c491
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684010211210
+status: 3
+tags: []
+user_id: lauro

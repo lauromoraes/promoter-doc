@@ -11,8 +11,8 @@ datasets:
   - class_name: non-promoter
     path: data/raw-data/fasta/Bacillus_neg.fa
 features:
-  - k: 1
-    encode: label
+  - k: 2
+    encode: prop
     slice: [59, 20, 20]
 models_params:
   - model_name: GradientBoostingClassifier

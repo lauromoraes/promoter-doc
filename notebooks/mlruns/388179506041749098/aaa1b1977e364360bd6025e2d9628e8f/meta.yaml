@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/aaa1b1977e364360bd6025e2d9628e8f/artifacts
+end_time: 1684247855425
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: aaa1b1977e364360bd6025e2d9628e8f
+run_name: Quadratic Discriminant Analysis
+run_uuid: aaa1b1977e364360bd6025e2d9628e8f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684247855109
+status: 3
+tags: []
+user_id: lauro

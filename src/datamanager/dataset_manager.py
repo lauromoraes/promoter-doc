@@ -1,6 +1,13 @@
+import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 
 from src.datamanager.seq_encoders import *
+
+from pycaret.classification import ClassificationExperiment
+
+from rich.console import Console
+
+console = Console(color_system="windows")
 
 SEED = 17
 
@@ -16,6 +23,9 @@ class FeaturesManager(object):
         self.X = None
         self.y = None
 
+    def get_features(self):
+        return self.datasets
+
     def transform_raw_dataset(self, params: list[dict]) -> list[EncodedDataset]:
         """ Iterate over each parameter set and process raw data, transforming it into new encoded and
         sliced feature dataset.
@@ -27,7 +37,7 @@ class FeaturesManager(object):
             # Extract parameters from dict
             k = p['k']
             encode_type = p['encode']
-            slice_positions = p['slice']
+            slice_positions = p['slice'] if 'slice' in p.keys() else None
             # Encode single dataset
             d = self.raw_dataset_manager.encode_datasets(
                 encoder_type=encode_type,
@@ -63,6 +73,10 @@ class FeaturesManager(object):
         # Set attributes values
         self.X = X
         self.y = y
+
+        self.df_data = pd.DataFrame(*X)
+        self.df_data['y'] = y
+        ic(console.print(f'Df head: \n {self.df_data.head()}'))
 
         # Create partitions index and iterators
         self.partitions.get_n_splits(self.X[0], self.y)

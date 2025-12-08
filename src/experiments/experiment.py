@@ -10,10 +10,19 @@ from rich.console import Console
 
 from src.datamanager.dataset_manager import FeaturesManager
 
+from pycaret.classification import *
+
 console = Console(color_system="windows")
 
 
 class Experiment(object):
+    ''' Abstract class to define the structure of an experiment. It is
+    expected that each experiment will have a different implementation of
+    the train method.
+
+    :param exp_args: Arguments from the configuration file of the experiment
+    :type exp_args: Namespace
+    '''
     def __init__(self, exp_args: Namespace = None):
         self.exp_args = exp_args
         self.experiment_name = self.exp_args.experiment_name
@@ -56,10 +65,9 @@ class Experiment(object):
         return self.models
 
     def set_features(self):
-        ''' Extract features from raw data and stores them into a management
-        object.
+        ''' Transform raw data into features and split them into Cross validation folds using the arguments file.
 
-        :return: The features manager object
+        :return: A FeaturesManager object with all the features and partitions
         '''
         # Get info from arguments file
         raw_data_paths = [x['path'] for x in self.exp_args.datasets]
@@ -69,9 +77,14 @@ class Experiment(object):
         self.features_manager = FeaturesManager(fasta_paths=raw_data_paths)
         # Extract features from raw data
         self.features_manager.transform_raw_dataset(features_args)
+        console.print(f"Features extracted:\n\t{self.features_manager}")
+        console.print(f"Features extracted TYPE:\n\t{type(self.features_manager)}")
+
         # Split data into Cross validation folds
         self.features_manager.setup_partitions(n_splits=cv)
-
+        console.print(f"Features X:\n\t{type(self.features_manager.X)}")
+        for x in self.features_manager.X:
+            console.print(f"Features X:\n\t{x}")
         return self.features_manager
 
     # @abc.abstractmethod
@@ -102,7 +115,7 @@ class Experiment(object):
         for metric in mean_metrics.keys():
             values = [s[metric] for s in splits_metrics]
             mean_metrics[metric] = np.mean(values)
-        return mean_metrics
+        return {'mean': mean_metrics}
 
     # @abc.abstractmethod
     def test(self, model, X):
@@ -126,50 +139,88 @@ class Experiment(object):
         console.rule(f'Starting experiment: [red]{self.experiment_name}[/red]')
         mlflow.sklearn.autolog()
 
-        # Create or load experiment by the name in the config file
-        try:
-            mlflow_experiment = dict(mlflow.get_experiment_by_name(self.experiment_name))
-            experiment_id = mlflow_experiment['experiment_id']
-            console.print(f'Experiment already exists! Loading ([red]ID {experiment_id}[/red])')
-            console.print(mlflow_experiment)
-        except Exception as e:
-            experiment_id = mlflow.create_experiment(self.experiment_name)
-            console.print(e)
-            console.print(f'New Experiment created ([red]ID {experiment_id}[/red])')
+        df_data = self.features_manager.df_data
+        # Setup PyCaret experiment object with data and target column name (y) and other parameters to configure the
+        # experiment (verbose, html, session_id, log_experiment, log_plots, log_profile, log_data, experiment_name,
+        # use_gpu)
+        s = ClassificationExperiment()
+        s.setup(df_data, target='y', verbose=True, html=True, session_id=123, log_experiment=False,
+                log_plots=True, log_profile=True, log_data=True, experiment_name='experiment', use_gpu=True)
 
-        # Setup experiment for data splits
-        with mlflow.start_run(
-                experiment_id=experiment_id,
-                tags={'version': self.exp_args.experiment_version},
-                description=f'Parent run for {self.experiment_name}.',
-        ) as parent_run:
-            console.print(f"Starting Training/Test", justify="center", style='red')
-            # Prepare features
-            self.set_features()
-            exp_params = {}
-            mlflow.log_params(params=exp_params, )
-            splits_metrics = list()
-            # Setup splits
-            run_idx = 0
-            for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
-                # Setup run for one split
-                with mlflow.start_run(
-                        experiment_id=experiment_id,
-                        run_name=f'SPLIT_{run_idx}',
-                        nested=True,
-                        description=f'Child run {self.experiment_name}.',
-                ) as run:
-                    console.rule(f"Running split: [red]{(run_idx := run_idx + 1)}[/red]")
+        # model training and selection
+        best = s.compare_models()
 
-                    # Execute TRAINING step
-                    model = self.train(X_train, y_train)
+        console.print(f'Best model:\n\t{best}')
 
-                    # Execute TEST step
-                    y_pred = self.test(model, X_test)
-                    metrics = self.calculate_metrics(y_test, y_pred)
-                    console.print(metrics)
-                    splits_metrics.append(metrics)
+        s.plot_model(best, plot='residuals_interactive')
 
-            exp_metrics = self.aggregate_metrics(splits_metrics)
-            console.rule('Experiment mean metrics', style='blue')
-            console.print(exp_metrics)
+        # evaluate model
+        s.evaluate_model(best)
+
+        # predict on holdout set
+        pred_holdout = s.predict_model(best)
+
+        # predict on new dataset
+        new_df_data = df_data.copy().drop('y', axis=1)
+        predictions = s.predict_model(best, data=new_df_data)
+
+        # save transformation pipeline and model
+        s.save_model(best, 'best-model')
+
+        # # Create or load experiment by the name in the config file
+        # try:
+        #     mlflow_experiment = dict(mlflow.get_experiment_by_name(self.experiment_name))
+        #     experiment_id = mlflow_experiment['experiment_id']
+        #     console.print(f'Experiment already exists! Loading ([red]ID {experiment_id}[/red])')
+        #     console.print(mlflow_experiment)
+        # except Exception as e:
+        #     experiment_id = mlflow.create_experiment(self.experiment_name)
+        #     console.print(e)
+        #     console.print(f'New Experiment created ([red]ID {experiment_id}[/red])')
+        #
+        # # Setup experiment for data splits
+        # with mlflow.start_run(
+        #         experiment_id=experiment_id,
+        #         tags={'version': self.exp_args.experiment_version},
+        #         description=f'Parent run for {self.experiment_name}.',
+        # ) as parent_run:
+        #     console.print(f"Starting Training/Test", justify="center", style='red')
+        #     # Prepare features
+        #     self.set_features()
+        #     exp_params = {}
+        #     mlflow.log_params(params=exp_params, )
+        #     splits_metrics = list()
+        #     # Setup splits
+        #     run_idx = 0
+
+            # for (X_train, X_test), (y_train, y_test) in _dm.get_next_split():
+            #     # Setup Mlflow run for the i-th partition split
+            #
+            #
+            #     with mlflow.start_run(
+            #             experiment_id=experiment_id,
+            #             run_name=f'SPLIT_{run_idx}',
+            #             nested=True,
+            #             description=f'Child run {self.experiment_name}.',
+            #     ) as run:
+            #         console.rule(f"Running split: [red]{(run_idx := run_idx + 1)}[/red]")
+            #
+            #         # Train model
+            #         model = self.train(X_train, y_train)
+            #
+            #
+            #
+            #
+            #         # Test model
+            #         y_pred = self.test(model, X_test)
+            #         # Calculate metrics
+            #         metrics = self.calculate_metrics(y_test, y_pred)
+            #         # Log metrics
+            #         console.print(metrics)
+            #
+            #         splits_metrics.append(metrics)
+            #
+            #
+            # exp_metrics = self.aggregate_metrics(splits_metrics)['mean']
+            # console.rule('Experiment mean metrics', style='blue')
+            # console.print(exp_metrics)

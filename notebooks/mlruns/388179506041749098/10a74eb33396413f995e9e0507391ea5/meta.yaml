@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/388179506041749098/10a74eb33396413f995e9e0507391ea5/artifacts
+end_time: 1684001110025
+entry_point_name: ''
+experiment_id: '388179506041749098'
+lifecycle_stage: active
+run_id: 10a74eb33396413f995e9e0507391ea5
+run_name: Random Forest Classifier
+run_uuid: 10a74eb33396413f995e9e0507391ea5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684001109723
+status: 3
+tags: []
+user_id: lauro

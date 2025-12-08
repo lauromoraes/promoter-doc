@@ -13,6 +13,9 @@ from sklearn.preprocessing import LabelEncoder
 
 from icecream import ic as ic
 
+from rich.console import Console
+console = Console(color_system="windows")
+
 
 # ic.disable()
 
@@ -82,8 +85,9 @@ class EncodedDataset(Dataset):
         for dataset in self.raw_datasets:
             if self.slice:
                 dataset = [s[upstream:downstream] for s in dataset]
-                print(dataset)
-                dataset = self.transform_sequences(sequences=dataset, k=self.k, step=self.step)
+                # print(dataset)
+                # console.print(f'Dataset sequences: \n {dataset[:5]}')
+            dataset = self.transform_sequences(sequences=dataset, k=self.k, step=self.step)
             datasets.append(dataset)
         return datasets
 
@@ -156,45 +160,72 @@ class OneHotSeqEncoder(EncodedDataset):
 
 class PropertyEncoder(EncodedDataset):
     # TODO: implement PropertyEncoder Class
-    def __init__(self, raw_datasets: tuple[list[str]], k: int = 1, step: int = 1, encode_type: str = 'label',
-                 slice: tuple[int] = None, discard_invalids: bool = True) -> None:
+    def __init__(self, raw_datasets: tuple[list[str]], k: int = 1, step: int = 1,
+                 slice: tuple[int] = None, discard_invalids: bool = True, encode_type: str = 'prop') -> None:
         """
 
-        :param raw_datasets:
-        :param k:
-        :param step:
+        :param raw_datasets: tuple of (positive, negative) datasets
+        :param k: k-mer size
+        :param step: step size for sliding window
+        :param slice: (upstream, downstream, length)
         :param encode_type:
-        :param slice:
-        :param discard_invalids:
+        :param discard_invalids: if True, discard sequences with invalid characters
         """
-        super(PropertyEncoder, self).__init__(raw_datasets, k, step, encode_type, slice, discard_invalids)
-
-    def get_prop_data(self, k: int = None):
         if k == 2:
-            file_path = 'dinuc'
+            self.prop_group = 'dinuc'
         elif k == 3:
-            file_path = 'trinuc'
+            self.prop_group = 'trinuc'
         else:
             raise ValueError(f'k value must be 2 or 3, received {k}')
-        file_path = os.path.join(os.getcwd(), '..', 'data', 'raw-data', 'physicochemical-properties-reference',
-                                 f'{file_path}.tsv')
+        self.k = k
+        self.step = step
+        self.encode_type = f'property_{self.prop_group}'
+        self.prop_index = None
+        self.prop_data = None
+        self.set_prop_data()
+        super(PropertyEncoder, self).__init__(raw_datasets, k, step, self.encode_type, slice, discard_invalids)
+
+    def set_prop_data(self, normalize: bool = False):
+        prefix = 'normalized' if normalize else 'original'
+        if normalize:
+            file_path = os.path.join(os.getcwd(), 'data', 'raw-data', 'physicochemical-properties-reference',
+                                     f'{self.prop_group}.tsv')
+        else:
+            file_path = os  .path.join(os.getcwd(), 'data', 'raw-data', 'physicochemical-properties-reference',
+                                 f'{prefix}-{self.prop_group}.tsv')
         prop_data = pd.read_csv(file_path, sep='\t', index_col=0)
         self.prop_index = prop_data.index
+        self.prop_data = prop_data
         return prop_data
+
+    def get_prop_data(self):
+        """ Get the physicochemical properties values of nucleotides (dinucleotides or trinucleotide
+        The data is used to encode the k-mers of the sequences into a dataset of sequences using physicochemical
+        properties of nucleotides (dinucleotides or trinucleotides) of the original sequences.
+
+        :return: pandas DataFrame with the properties of each k-mer composition (dinucleotide or trinucleotide)
+        """
+        if self.prop_data is None:
+            self.set_prop_data()
+        return self.prop_data
 
     def transform_sequences(self, sequences: list[str], k: int = 1, step: int = 1):
         """Receive a single dataset of nucelotides sequences and transform it into
-        a dataset of sequences of
+        a dataset of sequences using physicochemical properties of nucleotides
+        (dinucleotides or trinucleotides) of the original sequences.
 
-        :param sequences:
-        :param k:
-        :param step:
-        :return:
+        :param sequences: list of sequences
+        :param k: k-mer size
+        :param step: step size for sliding window
+        :return: encoded sequences
         """
-        sequences_mers = [self.get_k_mers(s, k, step) for s in sequences]
-        prop_data = self.get_prop_data(k)
-        prop_idx = prop_data.index
+        # Get a list of k-mers for each sequence
+        sequences_mers = [self.get_k_mers(s, self.k, step) for s in sequences]
+        prop_data = self.prop_data
+        prop_idx = self.prop_index
+        # Get the property values for each k-mer
         encoded = np.array([np.array([prop_data[mer] for mer in sequence]) for sequence in sequences_mers])
+        # Swap axes to get the right shape (n_props, n_seqs, n_mers)
         encoded = encoded.swapaxes(0, 2)
         encoded = encoded.swapaxes(1, 2)
         return encoded

@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/lauro/PycharmProjects/promoter-doc/notebooks/mlruns/493997094225846695/c21d1400471b4f9eb236333b1d9ff30f/artifacts
+end_time: 1684261561538
+entry_point_name: ''
+experiment_id: '493997094225846695'
+lifecycle_stage: active
+run_id: c21d1400471b4f9eb236333b1d9ff30f
+run_name: Logistic Regression
+run_uuid: c21d1400471b4f9eb236333b1d9ff30f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684261558894
+status: 3
+tags: []
+user_id: lauro
